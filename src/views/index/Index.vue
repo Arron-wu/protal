@@ -45,33 +45,33 @@
   <el-container>
     <el-aside width="200px">
       <ul id="go">
-        <li><a href="url" @click.prevent="changData(1)" class="selected">旅游</a></li>
-        <li><a href="url" @click.prevent="changData(2)">美食</a></li>
-        <li><a href="url" @click.prevent="changData(3)">娱乐</a></li>
-        <li><a href="url" @click.prevent="changData(4)">音乐</a></li>
-        <li><a href="url" @click.prevent="changData(5)" >影视</a></li>
-        <li><a href="url" @click.prevent="changData(6)" >搞笑</a></li>
-        <li><a href="url" @click.prevent="changData(7)" >舞蹈</a></li>
-        <li><a href="url" @click.prevent="changData(8)" >美妆</a></li>
-        <li><a href="url" @click.prevent="changData(9)" >动漫</a></li>
-        <li><a href="url" @click.prevent="changData(10)" >体育</a></li>
+        <li><a href="url" id="1" @click.prevent="changData(1)" class="selected">旅游</a></li>
+        <li><a href="url" id="2" @click.prevent="changData(2)">美食</a></li>
+        <li><a href="url" id="3" @click.prevent="changData(3)">娱乐</a></li>
+        <li><a href="url" id="4" @click.prevent="changData(4)">音乐</a></li>
+        <li><a href="url" id="5" @click.prevent="changData(5)" >影视</a></li>
+        <li><a href="url" id="6" @click.prevent="changData(6)" >搞笑</a></li>
+        <li><a href="url" id="7" @click.prevent="changData(7)" >舞蹈</a></li>
+        <li><a href="url" id="8" @click.prevent="changData(8)" >美妆</a></li>
+        <li><a href="url" id="9" @click.prevent="changData(9)" >动漫</a></li>
+        <li><a href="url" id="10" @click.prevent="changData(10)" >体育</a></li>
       </ul>
     </el-aside>
     <el-main> 
       <div>
-        <div class="postDiv" @click="doGetPost(1)">
-        <img style="width: 320px;height: 220px;" src="https://wx4.sinaimg.cn/thumb180/a6a3f863gy1ggjooco9tjj20u00u0qv6.jpg" >
-        <p style="width: 100%;height: 45px;padding: 0;margin: 0;">报错说备课大师VB科技的SVN尽可能的数据库那几款发发发发发发发哥哥</p>
-        <div style="width: 100%;height: 40px;">
-          <img style="width: 40px;height: 40px;margin-left: 5px;float: left;" src="https://wx4.sinaimg.cn/thumb180/a6a3f863gy1ggjooco9tjj20u00u0qv6.jpg" >
-          <div style="float: left;">
-            <ul class="ugo">
-              <li style="display:block;">Arron</li>
-              <li style="margin-left: 10px;">今天 14:20</li>
-            </ul>
+          <div v-for="post in postList" v-bind:key="post" class="postDiv" @click="doGetPost(post.id,post.imgUrl)">
+            <img style="width: 320px;height: 220px;" :src="post.imgUrl" >
+            <p style="width: 100%;height: 45px;padding: 0;margin: 0;">{{post.title}}</p>
+            <div style="width: 100%;height: 40px;">
+              <img style="width: 40px;height: 40px;margin-left: 5px;float: left;" :src="post.avatar" >
+              <div style="float: left;">
+                <ul class="ugo">
+                  <li style="display:block;">{{post.username}}</li>
+                  <li style="margin-left: 10px;">{{post.createTime}}</li>
+                </ul>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
       </div>
     </el-main>
   </el-container>
@@ -85,11 +85,12 @@ export default {
   data() {
     return {
       postList : [{
+        id:'',
         imgUrl:'',
         title:'',
         avatar:'',
-        userName:'',
-        time:''
+        username:'',
+        createTime:''
       }],
       kindList:[{
         id:'',
@@ -105,27 +106,23 @@ export default {
       this.username = "用户名: " + key;
       this.online = true;
     }
-    //获取参数
-    let id = this.$route.query.key;
     //加载种类
     this.fetchKindList();
     //加载帖子
-    this.fetchPostList(id);
-    if (id != null){
-      document.getElementsByClassName ('selected')[0].classList.remove('selected');
-      document.getElementById(id).classList.add('selected');
-    }
+    this.fetchPostList(1);
   },
   methods: {
     //获取帖子
     fetchPostList(key) {
+      let temp = this;
+      axios.defaults.headers.common["token"] = sessionStorage.getItem("token");
       axios
-              .get("/api/protal/index"+ key, {})
+              .get("/api/protal/index/"+ key, {})
               .then(function(response) {
                 if (response.data.code === 200) {
-                  this.postList = response.data.data;
+                  temp.postList = response.data.data;
                 } else {
-                  this.$message.error(response.data.msg);
+                  temp.$message.error(response.data.msg);
                 }
               })
               .catch(function(error) {
@@ -134,13 +131,15 @@ export default {
     },
     //获取种类
     fetchKindList() {
+      let temp = this;
+      axios.defaults.headers.common["token"] = sessionStorage.getItem("token");
       axios
               .get("/api/protal/kindList", {})
               .then(function(response) {
                 if (response.data.code === 200) {
-                  this.kindList = response.data.data;
+                  temp.kindList = response.data.data;
                 } else {
-                  this.$message.error(response.data.msg);
+                  temp.$message.error(response.data.msg);
                 }
               })
               .catch(function(error) {
@@ -163,12 +162,14 @@ export default {
     },
     //切换
     changData(e) {
-      alert(e)
-      this.$router.push({ path: "/index", query: { key: e } });
+      console.log(e);
+      this.fetchPostList(e);
+      document.getElementsByClassName('selected')[0].classList.remove('selected');
+      document.getElementById(e).classList.add('selected');
     },
     //查看详情
-    doGetPost(id) {
-      this.$router.push({ path: "/postInfo", query: { id: id } });
+    doGetPost(id,imgUrl) {
+      this.$router.push({ path: "/postInfo", query: { id: id ,imgUrl: imgUrl} });
     }
   }
 };
