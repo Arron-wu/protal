@@ -9,6 +9,20 @@ const routes = [
     redirect: "/index"
   },
   {
+    path: "/index",
+    name: "Index",
+    component: function() {
+      return import("../views/index/Index.vue");
+    }
+  },
+  {
+    path: "/postInfo",
+    name: "Info",
+    component: function() {
+      return import("../views/Post/info.vue");
+    }
+  },
+  {
     path: "/login",
     name: "Login",
     component: function() {
@@ -20,13 +34,6 @@ const routes = [
     name: "Register",
     component: function() {
       return import("../views/Register/Index.vue");
-    }
-  },
-  {
-    path: "/index",
-    name: "Index",
-    component: function() {
-      return import("../views/Forum/Index.vue");
     }
   },
   {
